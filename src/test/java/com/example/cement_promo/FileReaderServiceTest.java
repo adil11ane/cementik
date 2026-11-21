@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,26 +30,26 @@ public class FileReaderServiceTest {
 
 
     @Test
-    void returnsOrdersFromSource() throws FileNotFoundException {
-        List<Order> expected = List.of(new Order("A", 100, LocalDateTime.of(2021,2,9,10,0)));
+    void returnsOrdersFromSource() throws IOException {
+        List<Order> expected = List.of(new Order("A", 100, LocalDateTime.of(2021, 2, 9, 10, 0)));
         when(fileSource.getOrders("any.txt")).thenReturn(expected);
 
         LinkedList<Order> result = readerService.run("any.txt");
 
-        assertEquals(1,result.size());
-        assertEquals("A", result.getFirst().getCompany());
+        assertEquals(1, result.size());
+        assertEquals("A", result.getFirst().company());
     }
 
     @Test
-    void callsFileNotFound() throws FileNotFoundException {
+    void callsFileNotFound() throws IOException {
         when(fileSource.getOrders("missing.txt")).thenThrow(new FileNotFoundException("missing.txt"));
         assertThrows(FileNotFoundException.class, () -> readerService.run("missing.txt"));
     }
 
     @Test
-    void nothingInTheFile() throws FileNotFoundException {
+    void nothingInTheFile() throws IOException {
         when(fileSource.getOrders("empty.txt")).thenReturn(new LinkedList<>());
-        assertEquals(0,readerService.run("empty.txt").size());
+        assertEquals(0, readerService.run("empty.txt").size());
     }
 
 

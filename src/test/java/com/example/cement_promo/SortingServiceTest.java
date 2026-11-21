@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,38 +21,38 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class SortingServiceTest {
     @Mock
-    private  FileReaderService readerService;
+    private FileReaderService readerService;
 
-    private Order order(String company, int hour){
-        return new Order(company,100, LocalDateTime.of(2021,2,9,hour,0));
+    private Order order(String company, int hour) {
+        return new Order(company, 100, LocalDateTime.of(2021, 2, 9, hour, 0));
     }
 
     @Test
-    void sortsOrdersByDateFromEarliestToLatest() throws FileNotFoundException {
+    void sortsOrdersByDateFromEarliestToLatest() throws IOException {
         LinkedList<Order> unsorted = new LinkedList<>();
-        unsorted.add(order("A",11));
-        unsorted.add(order("B",12));
-        unsorted.add(order("C",10));
+        unsorted.add(order("A", 11));
+        unsorted.add(order("B", 12));
+        unsorted.add(order("C", 10));
 
         when(readerService.run("orders.txt")).thenReturn(unsorted);
 
         SortingService sortingService = new SortingService(readerService);
 
         LinkedList<Order> result = sortingService.sortingOrders("orders.txt");
-        List<String> companies = result.stream().map(Order::getCompany).toList();
+        List<String> companies = result.stream().map(Order::company).toList();
 
-        assertEquals(List.of("C","A","B"), companies);
+        assertEquals(List.of("C", "A", "B"), companies);
     }
 
     @Test
-    void returnsEmptyListIfNoOrders() throws FileNotFoundException {
+    void returnsEmptyListIfNoOrders() throws IOException {
         when(readerService.run("empty.txt")).thenReturn(new LinkedList<>());
         SortingService sortingService = new SortingService(readerService);
-        assertEquals(0,sortingService.sortingOrders("empty.txt").size());
+        assertEquals(0, sortingService.sortingOrders("empty.txt").size());
     }
 
     @Test
-    void passesFIleNotFound() throws FileNotFoundException {
+    void passesFIleNotFound() throws IOException {
         when(readerService.run("missing.txt")).thenThrow(new FileNotFoundException("missing.txt"));
         SortingService sortingService = new SortingService(readerService);
 

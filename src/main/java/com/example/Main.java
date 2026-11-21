@@ -4,23 +4,30 @@ package com.example;
 import com.example.adapters.*;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
 public class Main {
-    public static void main(String[] args) {
-        double pricePerKg = 1.2;
-        double startDiscountPercent = 50.0;
-        double discountStepPercent = 5.0;
+    public static void main(String[] args) throws IOException {
+        BigDecimal pricePerKg = new BigDecimal("1.2");
+        BigDecimal startDiscountPercent = new BigDecimal("50.0");
+        BigDecimal discountStepPercent = new BigDecimal("5.0");
 
-        process(new TxtFileAdapter(), "discount_day.txt", "result_txt.txt",
-                pricePerKg,startDiscountPercent,discountStepPercent);
+        FileSourceResolver resolver = new FileSourceResolver(List.of(
+                new TxtFileAdapter(),
+                new PlainFileAdapter()));
 
-        process(new PlainFileAdapter(), "discount_day_without_ext", "result_without_txt_ext_case.txt",
-                pricePerKg,startDiscountPercent,discountStepPercent);
+        process(resolver, "discount_day.txt", "result.txt",
+                pricePerKg, startDiscountPercent, discountStepPercent);
+
+        process(resolver, "discount_day_without_ext", "result_plain.txt",
+                pricePerKg, startDiscountPercent, discountStepPercent);
     }
 
-    private static void process(FileSource source, String inputPath, String outputPath,
-                                double pricePerKg, double startDiscountPercent, double discountStepPercent) {
+    private static void process(FileSourceResolver resolver, String inputPath, String outputPath,
+                                BigDecimal pricePerKg, BigDecimal startDiscountPercent, BigDecimal discountStepPercent) throws IOException {
+        FileSource source = resolver.resolve(inputPath);
         FileReaderService readerService = new FileReaderService(source);
         SortingService sortingService = new SortingService(readerService);
         DiscountApplianceService discountService =
@@ -28,10 +35,10 @@ public class Main {
         ResultWriter writer = new TotalResultWirter();
 
         try {
-            Map<String, Double> totals = discountService.applyDiscount(inputPath);
+            Map<String, BigDecimal> totals = discountService.applyDiscount(inputPath);
             writer.write(outputPath, totals);
         } catch (IOException e) {
-            System.err.println("Error writing file: " + e.getMessage()) ;
+            System.err.println("Error writing file: " + e.getMessage());
         }
 
     }

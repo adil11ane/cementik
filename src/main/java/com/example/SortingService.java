@@ -1,6 +1,7 @@
 package com.example;
 
-import java.io.FileNotFoundException;
+
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.LinkedList;
 
@@ -12,9 +13,9 @@ public class SortingService {
         this.outputService = outputService;
     }
 
-    public LinkedList<Order> sortingOrders(String filePath) throws FileNotFoundException {
+    public LinkedList<Order> sortingOrders(String filePath) throws IOException {
         LinkedList<Order> orders = outputService.run(filePath);
-        orders.sort(Comparator.comparing(Order::getDate));
+        orders.sort(Comparator.comparing(Order::date));
         return orders;
     }
 
